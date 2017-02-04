@@ -9,27 +9,45 @@
 import UIKit
 import Alamofire
 import SwiftGifOrigin
+import BTNavigationDropdownMenu
 
 class ViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var errorLabel: UILabel!
+    var activityIndicator: UIActivityIndicatorView?
+    var activitiView : UIView?
+    
     
     var categories = [Category]()
     var posts = [String : [Post]]()
-    var currentCat = "tech"
+    var currentCat = ""
+    var menuView : BTNavigationDropdownMenu!
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        self.navigationController?.navigationBar.topItem?.title = "Tech"
+        menuView = BTNavigationDropdownMenu(title: "Tech", items: ["Tech" as AnyObject])
+        menuView.cellTextLabelColor = UIColor.white
+        self.navigationItem.titleView = menuView
+        menuView.didSelectItemAtIndexHandler = {[weak self] (indexPath: Int) -> () in
+            print("Did select item at index: \(indexPath)")
+            self?.getPosts(self!.categories[indexPath].slug)
+        }
+        
+        self.errorLabel.isHidden = true
+        self.activityIndicator?.hidesWhenStopped = true
+        
+        self.tableView.rowHeight = UITableViewAutomaticDimension
+        self.tableView.estimatedRowHeight = 90
         
         getCategoriesRequest()
-        getPosts(currentCat)
-        
-        
+        getPosts("tech")
         
     }
+    
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -46,6 +64,7 @@ class ViewController: UIViewController {
                 if let json = response.result.value as? [String : AnyObject] {
                     if let rows = json["categories"] as? [[String : AnyObject]] {
                         
+                        var items = [String]()
                         for row in rows {
                             self.categories.append( Category.init(
                                 color: row["color"] as! String,
@@ -54,7 +73,11 @@ class ViewController: UIViewController {
                                 name: row["name"] as! String,
                                 slug: row["slug"] as! String
                             ))
+                            
+                            items.append(row["name"] as! String)
                         }
+                        
+                        self.menuView.updateItems(items as [AnyObject])
                     }
                 } else {
                     print("Error with Json")
@@ -69,14 +92,16 @@ class ViewController: UIViewController {
     
     func getPosts(_ category: String) {
         
+        if self.currentCat == category {
+            return
+        }
+        
+        self.currentCat = category
+        
         if posts.keys.contains(category) {
-            
-            self.currentCat = category
-            
             DispatchQueue.main.async {
                 self.tableView.reloadData()
             }
-            
         } else {
             getPostsRequest(category)
         }
@@ -85,7 +110,8 @@ class ViewController: UIViewController {
     
     func getPostsRequest(_ category: String) {
         
-        Alamofire.request("https://api.producthunt.com/v1/categories/\(category)/posts", headers: headers).responseJSON { response in
+        startActivitiIndicator()
+        Alamofire.request("https://api.producthunt.com/v1/categories/\(category)/posts?days_ago=5", headers: headers).responseJSON { response in
             switch response.result {
             case .success:
                 print("Get Posts Request Successful")
@@ -110,6 +136,13 @@ class ViewController: UIViewController {
                         
                         self.posts.updateValue(postsForOneCat, forKey: category)
                         
+                        if postsForOneCat.count == 0 {
+                            self.errorLabel.text = "There is no posts today..."
+                            self.errorLabel.isHidden = false
+                        } else {
+                            self.errorLabel.isHidden = true
+                        }
+                        
                         DispatchQueue.main.async {
                             self.tableView.reloadData()
                         }
@@ -118,11 +151,34 @@ class ViewController: UIViewController {
                 } else {
                     print("Error with Json")
                 }
+                self.activityIndicator?.stopAnimating()
+                self.activitiView?.isHidden = true
                 
             case .failure(let error):
                 print(error)
             }
         }
+    }
+    
+    func startActivitiIndicator() {
+        
+        
+        if activitiView == nil {
+            activitiView = UIView.init(frame: CGRect.init(x: self.view.frame.width/2-40, y: self.view.frame.height/2-40, width: 80, height: 80))
+            self.activitiView?.backgroundColor = UIColor.hex("0x444444", alpha: 0.6)
+            self.activitiView?.clipsToBounds = true
+            self.activitiView?.layer.cornerRadius = 10
+            
+            self.view.addSubview(activitiView!)
+        }
+        if activityIndicator == nil {
+            activityIndicator = UIActivityIndicatorView.init(frame: CGRect.init(x: (self.activitiView?.frame.width)!/2-30, y: (self.activitiView?.frame.height)!/2-30, width: 60, height: 60))
+            
+            self.activitiView?.addSubview(activityIndicator!)
+        }
+        
+        self.activitiView?.isHidden = false
+        self.activityIndicator?.startAnimating()
     }
 
 }
@@ -133,7 +189,15 @@ extension ViewController: UITableViewDataSource,UITableViewDelegate {
     // table view data source methods
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.posts[self.currentCat]?.count == nil ? 0 : (self.posts[self.currentCat]?.count)!
+        if self.posts[self.currentCat]?.count == nil || self.posts[self.currentCat]?.count == 0 {
+            
+            self.tableView.isHidden = true
+            
+            return 0
+        }
+        
+        self.tableView.isHidden = false
+        return (self.posts[self.currentCat]?.count)!
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -147,9 +211,13 @@ extension ViewController: UITableViewDataSource,UITableViewDelegate {
         let currentPosts = self.posts[self.currentCat]!
         
         cell.name.text = currentPosts[indexPath.item].name
+        cell.name.numberOfLines = 0
+        cell.name.lineBreakMode = .byWordWrapping
+        
         cell.tagline.text = currentPosts[indexPath.item].tagline
         cell.tagline.numberOfLines = 0
         cell.tagline.lineBreakMode = .byWordWrapping
+        
         cell.votesCountButton.setTitle("\(currentPosts[indexPath.item].votes_count!)", for: .normal)
         
         if currentPosts[indexPath.item].thumbnail.image == nil {
@@ -173,6 +241,25 @@ extension ViewController: UITableViewDataSource,UITableViewDelegate {
         
     }
     
+}
+
+extension UIColor {
+    
+    class func hex (_ hexStr : NSString, alpha : CGFloat) -> UIColor {
+        
+        let realHexStr = hexStr.replacingOccurrences(of: "#", with: "")
+        let scanner = Scanner(string: realHexStr as String)
+        var color: UInt32 = 0
+        if scanner.scanHexInt32(&color) {
+            let r = CGFloat((color & 0xFF0000) >> 16) / 255.0
+            let g = CGFloat((color & 0x00FF00) >> 8) / 255.0
+            let b = CGFloat(color & 0x0000FF) / 255.0
+            return UIColor(red:r,green:g,blue:b,alpha:alpha)
+        } else {
+            print("invalid hex string", terminator: "")
+            return UIColor.white
+        }
+    }
 }
 
 
