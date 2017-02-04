@@ -10,6 +10,7 @@
 		074A71A516E95FF8E987F624 /* Pods_gglads.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D75D40E208C01EE805D0A52B /* Pods_gglads.framework */; };
 		C488581F1E46259F0087CE06 /* Post.swift in Sources */ = {isa = PBXBuildFile; fileRef = C488581E1E46259F0087CE06 /* Post.swift */; };
 		C48858211E4626E30087CE06 /* Thumbnail.swift in Sources */ = {isa = PBXBuildFile; fileRef = C48858201E4626E30087CE06 /* Thumbnail.swift */; };
+		C48858231E463F6F0087CE06 /* TableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C48858221E463F6F0087CE06 /* TableViewCell.swift */; };
 		C49F1B1B1E45DFC00078469C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C49F1B1A1E45DFC00078469C /* AppDelegate.swift */; };
 		C49F1B1D1E45DFC00078469C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C49F1B1C1E45DFC00078469C /* ViewController.swift */; };
 		C49F1B201E45DFC00078469C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C49F1B1E1E45DFC00078469C /* Main.storyboard */; };
@@ -43,6 +44,7 @@
 		57A652FC6E8B4E3995783566 /* Pods-gglads.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-gglads.debug.xcconfig"; path = "Pods/Target Support Files/Pods-gglads/Pods-gglads.debug.xcconfig"; sourceTree = "<group>"; };
 		C488581E1E46259F0087CE06 /* Post.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
 		C48858201E4626E30087CE06 /* Thumbnail.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Thumbnail.swift; sourceTree = "<group>"; };
+		C48858221E463F6F0087CE06 /* TableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewCell.swift; sourceTree = "<group>"; };
 		C49F1B171E45DFC00078469C /* gglads.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = gglads.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C49F1B1A1E45DFC00078469C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C49F1B1C1E45DFC00078469C /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -137,6 +139,7 @@
 				C49F1B231E45DFC00078469C /* LaunchScreen.storyboard */,
 				C49F1B261E45DFC00078469C /* Info.plist */,
 				C49F1B481E4617990078469C /* Const.swift */,
+				C48858221E463F6F0087CE06 /* TableViewCell.swift */,
 			);
 			path = gglads;
 			sourceTree = "<group>";
@@ -241,15 +244,18 @@
 					C49F1B161E45DFC00078469C = {
 						CreatedOnToolsVersion = 8.2.1;
 						DevelopmentTeam = D9799SULEW;
+						LastSwiftMigration = 0820;
 						ProvisioningStyle = Automatic;
 					};
 					C49F1B2A1E45DFC10078469C = {
 						CreatedOnToolsVersion = 8.2.1;
+						LastSwiftMigration = 0820;
 						ProvisioningStyle = Automatic;
 						TestTargetID = C49F1B161E45DFC00078469C;
 					};
 					C49F1B351E45DFC10078469C = {
 						CreatedOnToolsVersion = 8.2.1;
+						LastSwiftMigration = 0820;
 						ProvisioningStyle = Automatic;
 						TestTargetID = C49F1B161E45DFC00078469C;
 					};
@@ -360,6 +366,7 @@
 				C48858211E4626E30087CE06 /* Thumbnail.swift in Sources */,
 				C49F1B491E4617990078469C /* Const.swift in Sources */,
 				C49F1B4C1E4618D60078469C /* Category.swift in Sources */,
+				C48858231E463F6F0087CE06 /* TableViewCell.swift in Sources */,
 				C488581F1E46259F0087CE06 /* Post.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
