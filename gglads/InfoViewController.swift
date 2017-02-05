@@ -8,6 +8,7 @@
 
 import UIKit
 import Alamofire
+import ImageSlideshow
 
 class InfoViewController: UIViewController {
     
@@ -17,6 +18,8 @@ class InfoViewController: UIViewController {
     @IBOutlet weak var votesCountButton: UIButton!
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var getItButton: UIButton!
+    
+    var slideshowTransitioningDelegate: ZoomAnimatedTransitioningDelegate?
     
     var post: Post!
 
@@ -42,6 +45,7 @@ class InfoViewController: UIViewController {
         self.votesCountButton.layer.cornerRadius = 3
         
         self.getItButton.layer.cornerRadius = self.votesCountButton.layer.cornerRadius
+        
         
     }
     

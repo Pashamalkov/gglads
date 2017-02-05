@@ -17,12 +17,13 @@ class ViewController: UIViewController {
     @IBOutlet weak var errorLabel: UILabel!
     var activityIndicator: UIActivityIndicatorView?
     var activitiView : UIView?
+    var refreshControl: UIRefreshControl!
+    var menuView : BTNavigationDropdownMenu!
     
     
     var categories = [Category]()
     var posts = [String : [Post]]()
     var currentCat = ""
-    var menuView : BTNavigationDropdownMenu!
     var currentIndex: IndexPath?
     
     
@@ -30,10 +31,10 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        menuView = BTNavigationDropdownMenu(title: "Tech", items: ["Tech" as AnyObject])
-        menuView.cellTextLabelColor = UIColor.white
-        self.navigationItem.titleView = menuView
-        menuView.didSelectItemAtIndexHandler = {[weak self] (indexPath: Int) -> () in
+        self.menuView = BTNavigationDropdownMenu(title: "Tech", items: ["Tech" as AnyObject])
+        self.menuView.cellTextLabelColor = UIColor.white
+        self.navigationItem.titleView = self.menuView
+        self.menuView.didSelectItemAtIndexHandler = {[weak self] (indexPath: Int) -> () in
             print("Did select item at index: \(indexPath)")
             self?.getPosts(self!.categories[indexPath].slug)
         }
@@ -41,19 +42,31 @@ class ViewController: UIViewController {
         self.errorLabel.isHidden = true
         self.activityIndicator?.hidesWhenStopped = true
         
+        self.refreshControl = UIRefreshControl()
+        self.refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
+        self.refreshControl.addTarget(self, action: #selector(ViewController.refresh(_:)), for: UIControlEvents.valueChanged)
+        self.tableView.addSubview(self.refreshControl)
         self.tableView.rowHeight = UITableViewAutomaticDimension
         self.tableView.estimatedRowHeight = 90
         
-        
-        getPosts("tech")
-        getCategoriesRequest()
+        self.getPosts("tech")
+        self.getCategoriesRequest()
         
     }
     
+    func refresh(_ sender:AnyObject) {
+        // Code to refresh table view
+        self.getPostsRequest(self.currentCat)
+    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+        for posts in self.posts.values {
+            for post in posts {
+                post.thumbnail.image = nil
+            }
+        }
     }
     
     func getCategoriesRequest() {
@@ -112,7 +125,9 @@ class ViewController: UIViewController {
     
     func getPostsRequest(_ category: String) {
         
-        startActivitiIndicator()
+        if !self.refreshControl.isRefreshing {
+            self.startActivitiIndicator()
+        }
         Alamofire.request("https://api.producthunt.com/v1/categories/\(category)/posts?days_ago=5", headers: headers).responseJSON { response in
             switch response.result {
             case .success:
@@ -156,12 +171,14 @@ class ViewController: UIViewController {
                 } else {
                     print("Error with Json")
                 }
-                self.activityIndicator?.stopAnimating()
-                self.activitiView?.isHidden = true
+                
                 
             case .failure(let error):
                 print(error)
             }
+            self.activityIndicator?.stopAnimating()
+            self.activitiView?.isHidden = true
+            self.refreshControl.endRefreshing()
         }
     }
     
@@ -215,32 +232,53 @@ extension ViewController: UITableViewDataSource,UITableViewDelegate {
         
         let currentPosts = self.posts[self.currentCat]!
         
-        cell.name.text = currentPosts[indexPath.item].name
+        cell.name.text = currentPosts[indexPath.row].name
         cell.name.numberOfLines = 0
         cell.name.lineBreakMode = .byWordWrapping
         
-        cell.tagline.text = currentPosts[indexPath.item].tagline
+        cell.tagline.text = currentPosts[indexPath.row].tagline
         cell.tagline.numberOfLines = 0
         cell.tagline.lineBreakMode = .byWordWrapping
         
-        cell.votesCountButton.setTitle("\(currentPosts[indexPath.item].votes_count!)", for: .normal)
+        cell.votesCountButton.setTitle("\(currentPosts[indexPath.row].votes_count!)", for: .normal)
         cell.votesCountButton.layer.borderWidth = 1
         cell.votesCountButton.layer.borderColor = UIColor.groupTableViewBackground.cgColor
         cell.votesCountButton.layer.cornerRadius = 3
         
-        if currentPosts[indexPath.item].thumbnail.image == nil {
+        cell.thumbnail.image = nil
+        
+        func downloadGif() {
+            DispatchQueue.global().async {
+                let image = UIImage.gif(url: (currentPosts[indexPath.row].thumbnail.image_url)!)
+                DispatchQueue.main.async {
+                    
+                    if cell.name.text == currentPosts[indexPath.row].name {
+                        cell.thumbnail.image = nil
+                        cell.thumbnail.image = image
+                    }
+                }
+            }
+        }
+        
+        if currentPosts[indexPath.row].thumbnail.image == nil {
             
             DispatchQueue.global().async {
-                currentPosts[indexPath.item].thumbnail.image = UIImage.gif(url: (currentPosts[indexPath.item].thumbnail.image_url)!)
-                DispatchQueue.main.async {
-                    cell.thumbnail.image = (currentPosts[indexPath.item].thumbnail.image)!
-                }
+                
+                self.download(url: (currentPosts[indexPath.row].thumbnail.image_url)!, completion: { (image: UIImage?) in
+                    
+                    if image != nil {
+                        currentPosts[indexPath.row].thumbnail.image = image!
+                        cell.thumbnail.image = (currentPosts[indexPath.row].thumbnail.image)!
+                        downloadGif()
+                    }
+                })
             }
             
         } else {
-            cell.thumbnail.image = nil
-            cell.thumbnail.image = (currentPosts[indexPath.item].thumbnail.image)!
+            cell.thumbnail.image = (currentPosts[indexPath.row].thumbnail.image)!
+            downloadGif()
         }
+        
         
         return cell
     }
@@ -252,13 +290,24 @@ extension ViewController: UITableViewDataSource,UITableViewDelegate {
         
     }
     
+    func download(url: String, completion: @escaping (_ image: UIImage?) -> Void) {
+        
+        Alamofire.request(url).responseData { response in
+            if let data = response.result.value {
+                completion(UIImage(data: data))
+            }
+        }
+        completion(nil)
+    }
+
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         
         if segue.identifier == "SegueToInfo" {
             
             if let viewController: InfoViewController = segue.destination as? InfoViewController {
                 
-                viewController.post = self.posts[self.currentCat]![(self.currentIndex?.item)!]
+                viewController.post = self.posts[self.currentCat]![(self.currentIndex?.row)!]
                 
             }
         }
