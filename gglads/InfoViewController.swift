@@ -8,7 +8,6 @@
 
 import UIKit
 import Alamofire
-import ImageSlideshow
 
 class InfoViewController: UIViewController {
     
@@ -18,8 +17,6 @@ class InfoViewController: UIViewController {
     @IBOutlet weak var votesCountButton: UIButton!
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var getItButton: UIButton!
-    
-    var slideshowTransitioningDelegate: ZoomAnimatedTransitioningDelegate?
     
     var post: Post!
 
@@ -73,12 +70,13 @@ class InfoViewController: UIViewController {
     
     
     func downloadImage() {
+        //download small image
         self.download(url: self.post.screenshot_url_mini, completion: { (image: UIImage?) in
             
             if image != nil {
                 self.imageView.image = image!
             }
-            
+            //download big image
             self.download(url: self.post.screenshot_url, completion: { (image: UIImage?) in
                 
                 if image != nil {

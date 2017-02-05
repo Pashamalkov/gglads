@@ -17,5 +17,4 @@ let headers: HTTPHeaders = [
     "Content-Type": "application/json",
     "Authorization": "Bearer \(access_token)",
     "Host": "api.producthunt.com"
-    
 ]

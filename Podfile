@@ -6,6 +6,4 @@ target ‘gglads’ do
     pod 'Alamofire', '~> 4.3'
     pod 'SwiftGifOrigin', '~> 1.6.1'
     pod 'BTNavigationDropdownMenu'
-    pod 'ImageSlideshow', '~> 0.6'
-    pod "ImageSlideshow/AFURL"
 end

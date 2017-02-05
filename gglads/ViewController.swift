@@ -15,11 +15,11 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var errorLabel: UILabel!
+    
     var activityIndicator: UIActivityIndicatorView?
     var activitiView : UIView?
     var refreshControl: UIRefreshControl!
     var menuView : BTNavigationDropdownMenu!
-    
     
     var categories = [Category]()
     var posts = [String : [Post]]()
@@ -36,7 +36,7 @@ class ViewController: UIViewController {
         self.navigationItem.titleView = self.menuView
         self.menuView.didSelectItemAtIndexHandler = {[weak self] (indexPath: Int) -> () in
             print("Did select item at index: \(indexPath)")
-            self?.getPosts(self!.categories[indexPath].slug)
+            self!.getPosts(self!.categories[indexPath].slug)
         }
         
         self.errorLabel.isHidden = true
@@ -102,7 +102,6 @@ class ViewController: UIViewController {
                 print(error)
             }
         }
-        
     }
     
     func getPosts(_ category: String) {
@@ -114,13 +113,15 @@ class ViewController: UIViewController {
         self.currentCat = category
         
         if posts.keys.contains(category) {
+            if (posts[category]?.count)! > 0 {
+                self.errorLabel.isHidden = true
+            }
             DispatchQueue.main.async {
                 self.tableView.reloadData()
             }
         } else {
             getPostsRequest(category)
         }
-        
     }
     
     func getPostsRequest(_ category: String) {
@@ -128,7 +129,7 @@ class ViewController: UIViewController {
         if !self.refreshControl.isRefreshing {
             self.startActivitiIndicator()
         }
-        Alamofire.request("https://api.producthunt.com/v1/categories/\(category)/posts?days_ago=5", headers: headers).responseJSON { response in
+        Alamofire.request("https://api.producthunt.com/v1/categories/\(category)/posts?days_ago=0", headers: headers).responseJSON { response in
             switch response.result {
             case .success:
                 print("Get Posts Request Successful")
@@ -157,7 +158,7 @@ class ViewController: UIViewController {
                         self.posts.updateValue(postsForOneCat, forKey: category)
                         
                         if postsForOneCat.count == 0 {
-                            self.errorLabel.text = "There is no posts today..."
+                            self.errorLabel.text = "There are no posts today..."
                             self.errorLabel.isHidden = false
                         } else {
                             self.errorLabel.isHidden = true
@@ -171,8 +172,6 @@ class ViewController: UIViewController {
                 } else {
                     print("Error with Json")
                 }
-                
-                
             case .failure(let error):
                 print(error)
             }
@@ -193,6 +192,7 @@ class ViewController: UIViewController {
             
             self.view.addSubview(activitiView!)
         }
+        
         if activityIndicator == nil {
             activityIndicator = UIActivityIndicatorView.init(frame: CGRect.init(x: (self.activitiView?.frame.width)!/2-30, y: (self.activitiView?.frame.height)!/2-30, width: 60, height: 60))
             
@@ -202,19 +202,36 @@ class ViewController: UIViewController {
         self.activitiView?.isHidden = false
         self.activityIndicator?.startAnimating()
     }
+    
+    func download(url: String, completion: @escaping (_ image: UIImage?) -> Void) {
+        
+        Alamofire.request(url).responseData { response in
+            if let data = response.result.value {
+                completion(UIImage(data: data))
+            }
+        }
+        completion(nil)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
+        if segue.identifier == "SegueToInfo",
+            let viewController: InfoViewController = segue.destination as? InfoViewController {
+            viewController.post = self.posts[self.currentCat]![(self.currentIndex?.row)!]
+        }
+    }
 
 }
 
 
 // MARK: - UITableViewDataSource and UITableViewDelegate
-extension ViewController: UITableViewDataSource,UITableViewDelegate {
-    // table view data source methods
+extension ViewController: UITableViewDataSource, UITableViewDelegate {
+    // table view data source and delegate methods
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        
         if self.posts[self.currentCat]?.count == nil || self.posts[self.currentCat]?.count == 0 {
-            
             self.tableView.isHidden = true
-            
             return 0
         }
         
@@ -253,6 +270,7 @@ extension ViewController: UITableViewDataSource,UITableViewDelegate {
                 DispatchQueue.main.async {
                     
                     if cell.name.text == currentPosts[indexPath.row].name {
+                        //set nil for playing GIF
                         cell.thumbnail.image = nil
                         cell.thumbnail.image = image
                     }
@@ -263,23 +281,22 @@ extension ViewController: UITableViewDataSource,UITableViewDelegate {
         if currentPosts[indexPath.row].thumbnail.image == nil {
             
             DispatchQueue.global().async {
-                
+                //download image
                 self.download(url: (currentPosts[indexPath.row].thumbnail.image_url)!, completion: { (image: UIImage?) in
                     
                     if image != nil {
+                        //image caching
                         currentPosts[indexPath.row].thumbnail.image = image!
                         cell.thumbnail.image = (currentPosts[indexPath.row].thumbnail.image)!
+                        //download gif after image downloading
                         downloadGif()
                     }
                 })
             }
-            
         } else {
             cell.thumbnail.image = (currentPosts[indexPath.row].thumbnail.image)!
             downloadGif()
         }
-        
-        
         return cell
     }
     
@@ -287,30 +304,6 @@ extension ViewController: UITableViewDataSource,UITableViewDelegate {
         
         self.currentIndex = indexPath
         performSegue(withIdentifier: "SegueToInfo", sender: self)
-        
-    }
-    
-    func download(url: String, completion: @escaping (_ image: UIImage?) -> Void) {
-        
-        Alamofire.request(url).responseData { response in
-            if let data = response.result.value {
-                completion(UIImage(data: data))
-            }
-        }
-        completion(nil)
-    }
-
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        
-        if segue.identifier == "SegueToInfo" {
-            
-            if let viewController: InfoViewController = segue.destination as? InfoViewController {
-                
-                viewController.post = self.posts[self.currentCat]![(self.currentIndex?.row)!]
-                
-            }
-        }
     }
     
 }
