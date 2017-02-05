@@ -23,6 +23,7 @@ class ViewController: UIViewController {
     var posts = [String : [Post]]()
     var currentCat = ""
     var menuView : BTNavigationDropdownMenu!
+    var currentIndex: IndexPath?
     
     
     override func viewDidLoad() {
@@ -43,8 +44,9 @@ class ViewController: UIViewController {
         self.tableView.rowHeight = UITableViewAutomaticDimension
         self.tableView.estimatedRowHeight = 90
         
-        getCategoriesRequest()
+        
         getPosts("tech")
+        getCategoriesRequest()
         
     }
     
@@ -130,7 +132,10 @@ class ViewController: UIViewController {
                                     name: row["name"] as! String,
                                     tagline: row["tagline"] as! String,
                                     votes_count: row["votes_count"] as! Int,
-                                    thumbnail: Thumbnail.init(id: thumb["id"] as! Int, media_type: thumb["media_type"] as! String, image_url: thumb["image_url"] as! String)
+                                    thumbnail: Thumbnail.init(id: thumb["id"] as! Int, media_type: thumb["media_type"] as! String, image_url: thumb["image_url"] as! String),
+                                    redirect_url: row["redirect_url"] as! String,
+                                    screenshot_url: (row["screenshot_url"] as! [String : String])["850px"]!,
+                                    screenshot_url_mini: (row["screenshot_url"] as! [String : String])["300px"]!
                             ))
                         }
                         
@@ -239,13 +244,28 @@ extension ViewController: UITableViewDataSource,UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
+        self.currentIndex = indexPath
+        performSegue(withIdentifier: "SegueToInfo", sender: self)
+        
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
+        if segue.identifier == "SegueToInfo" {
+            
+            if let viewController: InfoViewController = segue.destination as? InfoViewController {
+                
+                viewController.post = self.posts[self.currentCat]![(self.currentIndex?.item)!]
+                
+            }
+        }
     }
     
 }
 
 extension UIColor {
     
-    class func hex (_ hexStr : NSString, alpha : CGFloat) -> UIColor {
+    static func hex (_ hexStr : NSString, alpha : CGFloat) -> UIColor {
         
         let realHexStr = hexStr.replacingOccurrences(of: "#", with: "")
         let scanner = Scanner(string: realHexStr as String)
