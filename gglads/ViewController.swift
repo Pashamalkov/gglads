@@ -224,6 +224,9 @@ extension ViewController: UITableViewDataSource,UITableViewDelegate {
         cell.tagline.lineBreakMode = .byWordWrapping
         
         cell.votesCountButton.setTitle("\(currentPosts[indexPath.item].votes_count!)", for: .normal)
+        cell.votesCountButton.layer.borderWidth = 1
+        cell.votesCountButton.layer.borderColor = UIColor.groupTableViewBackground.cgColor
+        cell.votesCountButton.layer.cornerRadius = 3
         
         if currentPosts[indexPath.item].thumbnail.image == nil {
             
