@@ -14,9 +14,7 @@ final class Posts: ResponseObjectSerializable {
     
     required init?(response: HTTPURLResponse, representation: AnyObject) {
         self.posts = Post.collection(response:response, representation: representation.value(forKey: "posts")! as AnyObject)
-        
     }
-    
 }
 
 final class Post: ResponseObjectSerializable, ResponseCollectionSerializable  {

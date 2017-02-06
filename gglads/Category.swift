@@ -8,7 +8,16 @@
 
 import UIKit
 
-class Category: NSObject {
+final class Categories: ResponseObjectSerializable {
+    
+    var cats = [Category]()
+    
+    required init?(response: HTTPURLResponse, representation: AnyObject) {
+        self.cats = Category.collection(response:response, representation: representation.value(forKey: "categories")! as AnyObject)
+    }
+}
+
+final class Category: ResponseObjectSerializable {
     
     var color: String!
     var id: Int!
@@ -16,15 +25,30 @@ class Category: NSObject {
     var name: String!
     var slug: String!
     
-    init(color: String, id: Int, item_name: String, name: String, slug: String) {
-        super.init()
+//    init(color: String, id: Int, item_name: String, name: String, slug: String) {
+//        super.init()
+//        
+//        self.color = color
+//        self.id = id
+//        self.item_name = item_name
+//        self.name = name
+//        self.slug = slug
+//        
+//    }
+    
+    required init?(response: HTTPURLResponse, representation: AnyObject) {
         
-        self.color = color
-        self.id = id
-        self.item_name = item_name
-        self.name = name
-        self.slug = slug
-        
+        self.color = representation.value(forKey:"color") as! String
+        self.id = representation.value(forKey:"id") as! Int
+        self.item_name = representation.value(forKey:"item_name") as! String
+        self.name = representation.value(forKey:"name") as! String
+        self.slug = representation.value(forKey:"slug") as! String
+    }
+    
+    public static func collection(response: HTTPURLResponse, representation: AnyObject) -> [Category] {
+        let catsArray = representation as! [AnyObject]
+        // using the map function we are able to instantiate Post while reusing our init? method above
+        return catsArray.map({ Category(response:response, representation: $0 as AnyObject)! })
     }
 
 }

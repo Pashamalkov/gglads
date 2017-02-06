@@ -71,37 +71,44 @@ class ViewController: UIViewController {
     
     func getCategoriesRequest() {
         
-        Alamofire.request(baseUrl + "/v1/categories", headers: headers).responseJSON { response in
-            switch response.result {
-            case .success:
-                print("Get Categories Request Successful")
-                
-                if let json = response.result.value as? [String : AnyObject] {
-                    if let rows = json["categories"] as? [[String : AnyObject]] {
-                        
-                        var items = [String]()
-                        for row in rows {
-                            self.categories.append( Category.init(
-                                color: row["color"] as! String,
-                                id: row["id"] as! Int,
-                                item_name: row["item_name"] as! String,
-                                name: row["name"] as! String,
-                                slug: row["slug"] as! String
-                            ))
-                            
-                            items.append(row["name"] as! String)
-                        }
-                        
-                        self.menuView.updateItems(items as [AnyObject])
-                    }
-                } else {
-                    print("Error with Json")
-                }
-                
-            case .failure(let error):
-                print(error)
-            }
+        Alamofire.request(baseUrl + "/v1/categories", headers: headers).responseObject { (response: DataResponse<Categories>) in
+        
+            self.categories = response.value!.cats
+            self.menuView.updateItems(self.categories.map({$0.name}) as [AnyObject])
         }
+
+            
+//            .responseJSON { response in
+//            switch response.result {
+//            case .success:
+//                print("Get Categories Request Successful")
+//                
+//                if let json = response.result.value as? [String : AnyObject] {
+//                    if let rows = json["categories"] as? [[String : AnyObject]] {
+//                        
+//                        var items = [String]()
+//                        for row in rows {
+//                            self.categories.append( Category.init(
+//                                color: row["color"] as! String,
+//                                id: row["id"] as! Int,
+//                                item_name: row["item_name"] as! String,
+//                                name: row["name"] as! String,
+//                                slug: row["slug"] as! String
+//                            ))
+//                            
+//                            items.append(row["name"] as! String)
+//                        }
+//                        
+//                        self.menuView.updateItems(items as [AnyObject])
+//                    }
+//                } else {
+//                    print("Error with Json")
+//                }
+//                
+//            case .failure(let error):
+//                print(error)
+//            }
+//        }
     }
     
     func getPosts(_ category: String) {
