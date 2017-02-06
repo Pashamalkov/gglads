@@ -71,7 +71,7 @@ class ViewController: UIViewController {
     
     func getCategoriesRequest() {
         
-        Alamofire.request("https://api.producthunt.com/v1/categories", headers: headers).responseJSON { response in
+        Alamofire.request(baseUrl + "/v1/categories", headers: headers).responseJSON { response in
             switch response.result {
             case .success:
                 print("Get Categories Request Successful")
@@ -129,56 +129,79 @@ class ViewController: UIViewController {
         if !self.refreshControl.isRefreshing {
             self.startActivitiIndicator()
         }
-        Alamofire.request("https://api.producthunt.com/v1/categories/\(category)/posts?days_ago=0", headers: headers).responseJSON { response in
-            switch response.result {
-            case .success:
-                print("Get Posts Request Successful")
-                
-                if let json = response.result.value as? [String : AnyObject] {
-                    if let rows = json["posts"] as? [[String : AnyObject]] {
-                        
-                        var postsForOneCat = [Post]()
-                        
-                        for row in rows {
-                            let thumb = (row["thumbnail"] as! [String : AnyObject])
-                            
-                            postsForOneCat.append(
-                                Post.init(
-                                    id: row["id"] as! Int,
-                                    name: row["name"] as! String,
-                                    tagline: row["tagline"] as! String,
-                                    votes_count: row["votes_count"] as! Int,
-                                    thumbnail: Thumbnail.init(id: thumb["id"] as! Int, media_type: thumb["media_type"] as! String, image_url: thumb["image_url"] as! String),
-                                    redirect_url: row["redirect_url"] as! String,
-                                    screenshot_url: (row["screenshot_url"] as! [String : String])["850px"]!,
-                                    screenshot_url_mini: (row["screenshot_url"] as! [String : String])["300px"]!
-                            ))
-                        }
-                        
-                        self.posts.updateValue(postsForOneCat, forKey: category)
-                        
-                        if postsForOneCat.count == 0 {
-                            self.errorLabel.text = "There are no posts today..."
-                            self.errorLabel.isHidden = false
-                        } else {
-                            self.errorLabel.isHidden = true
-                        }
-                        
-                        DispatchQueue.main.async {
-                            self.tableView.reloadData()
-                        }
-
-                    }
-                } else {
-                    print("Error with Json")
-                }
-            case .failure(let error):
-                print(error)
+        Alamofire.request(baseUrl + "/v1/categories/\(category)/posts?days_ago=0", headers: headers).responseObject { (response: DataResponse<Posts>) in
+            
+//            print(response.value)
+            self.posts.updateValue(response.value!.posts, forKey: category)
+            
+            if response.value!.posts.count == 0 {
+                self.errorLabel.text = "There are no posts today..."
+                self.errorLabel.isHidden = false
+            } else {
+                self.errorLabel.isHidden = true
             }
+
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+            
             self.activityIndicator?.stopAnimating()
             self.activitiView?.isHidden = true
             self.refreshControl.endRefreshing()
+            
         }
+        
+        
+//            .responseJSON { response in
+//            switch response.result {
+//            case .success:
+//                print("Get Posts Request Successful")
+//                
+//                if let json = response.result.value as? [String : AnyObject] {
+//                    if let rows = json["posts"] as? [[String : AnyObject]] {
+//                        
+//                        var postsForOneCat = [Post]()
+//                        
+//                        for row in rows {
+//                            let thumb = (row["thumbnail"] as! [String : AnyObject])
+//                            
+//                            postsForOneCat.append(
+//                                Post.init(
+//                                    id: row["id"] as! Int,
+//                                    name: row["name"] as! String,
+//                                    tagline: row["tagline"] as! String,
+//                                    votes_count: row["votes_count"] as! Int,
+//                                    thumbnail: Thumbnail.init(id: thumb["id"] as! Int, media_type: thumb["media_type"] as! String, image_url: thumb["image_url"] as! String),
+//                                    redirect_url: row["redirect_url"] as! String,
+//                                    screenshot_url: (row["screenshot_url"] as! [String : String])["850px"]!,
+//                                    screenshot_url_mini: (row["screenshot_url"] as! [String : String])["300px"]!
+//                            ))
+//                        }
+//                        
+//                        self.posts.updateValue(postsForOneCat, forKey: category)
+//                        
+//                        if postsForOneCat.count == 0 {
+//                            self.errorLabel.text = "There are no posts today..."
+//                            self.errorLabel.isHidden = false
+//                        } else {
+//                            self.errorLabel.isHidden = true
+//                        }
+//                        
+//                        DispatchQueue.main.async {
+//                            self.tableView.reloadData()
+//                        }
+//
+//                    }
+//                } else {
+//                    print("Error with Json")
+//                }
+//            case .failure(let error):
+//                print(error)
+//            }
+//            self.activityIndicator?.stopAnimating()
+//            self.activitiView?.isHidden = true
+//            self.refreshControl.endRefreshing()
+//        }
     }
     
     func startActivitiIndicator() {
@@ -308,23 +331,6 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
     
 }
 
-extension UIColor {
-    
-    static func hex (_ hexStr : NSString, alpha : CGFloat) -> UIColor {
-        
-        let realHexStr = hexStr.replacingOccurrences(of: "#", with: "")
-        let scanner = Scanner(string: realHexStr as String)
-        var color: UInt32 = 0
-        if scanner.scanHexInt32(&color) {
-            let r = CGFloat((color & 0xFF0000) >> 16) / 255.0
-            let g = CGFloat((color & 0x00FF00) >> 8) / 255.0
-            let b = CGFloat(color & 0x0000FF) / 255.0
-            return UIColor(red:r,green:g,blue:b,alpha:alpha)
-        } else {
-            print("invalid hex string", terminator: "")
-            return UIColor.white
-        }
-    }
-}
+
 
 

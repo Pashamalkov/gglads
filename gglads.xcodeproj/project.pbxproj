@@ -21,6 +21,8 @@
 		C49F1B3B1E45DFC10078469C /* ggladsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C49F1B3A1E45DFC10078469C /* ggladsUITests.swift */; };
 		C49F1B491E4617990078469C /* Const.swift in Sources */ = {isa = PBXBuildFile; fileRef = C49F1B481E4617990078469C /* Const.swift */; };
 		C49F1B4C1E4618D60078469C /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = C49F1B4B1E4618D60078469C /* Category.swift */; };
+		C4C0B3D71E484D7600E4C9F9 /* Extentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4C0B3D61E484D7600E4C9F9 /* Extentions.swift */; };
+		C4C0B3D91E48551000E4C9F9 /* ResponseSerializable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4C0B3D81E48551000E4C9F9 /* ResponseSerializable.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +64,8 @@
 		C49F1B3C1E45DFC10078469C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C49F1B481E4617990078469C /* Const.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Const.swift; sourceTree = "<group>"; };
 		C49F1B4B1E4618D60078469C /* Category.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
+		C4C0B3D61E484D7600E4C9F9 /* Extentions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extentions.swift; sourceTree = "<group>"; };
+		C4C0B3D81E48551000E4C9F9 /* ResponseSerializable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResponseSerializable.swift; sourceTree = "<group>"; };
 		D75D40E208C01EE805D0A52B /* Pods_gglads.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_gglads.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -133,16 +137,16 @@
 		C49F1B191E45DFC00078469C /* gglads */ = {
 			isa = PBXGroup;
 			children = (
+				C4C0B3D31E484D1300E4C9F9 /* Controllers */,
 				C49F1B4A1E4618BD0078469C /* ClassLibrary */,
 				C49F1B1A1E45DFC00078469C /* AppDelegate.swift */,
-				C49F1B1C1E45DFC00078469C /* ViewController.swift */,
-				C48858261E4748210087CE06 /* InfoViewController.swift */,
 				C49F1B1E1E45DFC00078469C /* Main.storyboard */,
 				C49F1B211E45DFC00078469C /* Assets.xcassets */,
 				C49F1B231E45DFC00078469C /* LaunchScreen.storyboard */,
 				C49F1B261E45DFC00078469C /* Info.plist */,
 				C49F1B481E4617990078469C /* Const.swift */,
-				C48858221E463F6F0087CE06 /* TableViewCell.swift */,
+				C4C0B3D61E484D7600E4C9F9 /* Extentions.swift */,
+				C4C0B3D81E48551000E4C9F9 /* ResponseSerializable.swift */,
 			);
 			path = gglads;
 			sourceTree = "<group>";
@@ -173,6 +177,32 @@
 				C48858201E4626E30087CE06 /* Thumbnail.swift */,
 			);
 			name = ClassLibrary;
+			sourceTree = "<group>";
+		};
+		C4C0B3D31E484D1300E4C9F9 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				C4C0B3D51E484D4100E4C9F9 /* Main View Controller */,
+				C4C0B3D41E484D2700E4C9F9 /* Inforamtion View Controller */,
+			);
+			name = Controllers;
+			sourceTree = "<group>";
+		};
+		C4C0B3D41E484D2700E4C9F9 /* Inforamtion View Controller */ = {
+			isa = PBXGroup;
+			children = (
+				C48858261E4748210087CE06 /* InfoViewController.swift */,
+			);
+			name = "Inforamtion View Controller";
+			sourceTree = "<group>";
+		};
+		C4C0B3D51E484D4100E4C9F9 /* Main View Controller */ = {
+			isa = PBXGroup;
+			children = (
+				C49F1B1C1E45DFC00078469C /* ViewController.swift */,
+				C48858221E463F6F0087CE06 /* TableViewCell.swift */,
+			);
+			name = "Main View Controller";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -371,7 +401,9 @@
 				C49F1B4C1E4618D60078469C /* Category.swift in Sources */,
 				C48858231E463F6F0087CE06 /* TableViewCell.swift in Sources */,
 				C48858271E4748210087CE06 /* InfoViewController.swift in Sources */,
+				C4C0B3D91E48551000E4C9F9 /* ResponseSerializable.swift in Sources */,
 				C488581F1E46259F0087CE06 /* Post.swift in Sources */,
+				C4C0B3D71E484D7600E4C9F9 /* Extentions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
