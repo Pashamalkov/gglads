@@ -94,7 +94,3 @@ class InfoViewController: UIViewController {
         completion(nil)
     }
 }
-
-extension InfoViewController: UIScrollViewDelegate {
-    
-}

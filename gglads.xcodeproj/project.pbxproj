@@ -114,6 +114,15 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
+		C46F66BC1E488C0C00EADBE9 /* ResponseSerializable */ = {
+			isa = PBXGroup;
+			children = (
+				C46F66BA1E4880D000EADBE9 /* ResponseCollectionSerializable.swift */,
+				C4C0B3D81E48551000E4C9F9 /* ResponseObjectSerializable.swift */,
+			);
+			name = ResponseSerializable;
+			sourceTree = "<group>";
+		};
 		C49F1B0E1E45DFC00078469C = {
 			isa = PBXGroup;
 			children = (
@@ -148,8 +157,7 @@
 				C49F1B261E45DFC00078469C /* Info.plist */,
 				C49F1B481E4617990078469C /* Const.swift */,
 				C4C0B3D61E484D7600E4C9F9 /* Extentions.swift */,
-				C4C0B3D81E48551000E4C9F9 /* ResponseObjectSerializable.swift */,
-				C46F66BA1E4880D000EADBE9 /* ResponseCollectionSerializable.swift */,
+				C46F66BC1E488C0C00EADBE9 /* ResponseSerializable */,
 			);
 			path = gglads;
 			sourceTree = "<group>";
