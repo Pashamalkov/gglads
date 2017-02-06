@@ -19,8 +19,6 @@ final class Posts: ResponseObjectSerializable {
 
 final class Post: ResponseObjectSerializable, ResponseCollectionSerializable  {
     
-
-
     var id: Int!
     var name: String!
     var tagline: String!
@@ -30,21 +28,6 @@ final class Post: ResponseObjectSerializable, ResponseCollectionSerializable  {
     var redirect_url: String!
     var screenshot_url: String!
     var screenshot_url_mini: String!
-    
-//    init(id: Int, name: String, tagline: String, votes_count: Int, thumbnail: Thumbnail, redirect_url: String, screenshot_url: String, screenshot_url_mini: String) {
-//        super.init()
-//        
-//        self.id = id
-//        self.name = name
-//        self.tagline = tagline
-//        self.votes_count = votes_count
-//        self.thumbnail = thumbnail
-//        
-//        self.redirect_url = redirect_url
-//        self.screenshot_url = screenshot_url
-//        self.screenshot_url_mini = screenshot_url_mini
-//        
-//    }
     
     required init?(response: HTTPURLResponse, representation: AnyObject) {
         self.id = representation.value(forKey:"id") as! Int
@@ -56,9 +39,6 @@ final class Post: ResponseObjectSerializable, ResponseCollectionSerializable  {
         self.redirect_url = representation.value(forKey:"redirect_url") as! String
         self.screenshot_url = (representation.value(forKey:"screenshot_url") as! [String : String])["850px"]!
         self.screenshot_url_mini = (representation.value(forKey:"screenshot_url") as! [String : String])["300px"]!
-        
-//            screenshot_url: (row["screenshot_url"] ,
-        //                                    screenshot_url_mini: (row["screenshot_url"] as! [String : String])["300px"]!
     }
     
     public static func collection(response: HTTPURLResponse, representation: AnyObject) -> [Post] {
@@ -66,6 +46,4 @@ final class Post: ResponseObjectSerializable, ResponseCollectionSerializable  {
         // using the map function we are able to instantiate Post while reusing our init? method above
         return postArray.map({ Post(response:response, representation: $0 as AnyObject)! })
     }
-    
-    
 }

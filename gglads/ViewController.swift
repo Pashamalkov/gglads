@@ -26,7 +26,6 @@ class ViewController: UIViewController {
     var currentCat = ""
     var currentIndex: IndexPath?
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -43,7 +42,6 @@ class ViewController: UIViewController {
         self.activityIndicator?.hidesWhenStopped = true
         
         self.refreshControl = UIRefreshControl()
-        self.refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
         self.refreshControl.addTarget(self, action: #selector(ViewController.refresh(_:)), for: UIControlEvents.valueChanged)
         self.tableView.addSubview(self.refreshControl)
         self.tableView.rowHeight = UITableViewAutomaticDimension
@@ -51,7 +49,6 @@ class ViewController: UIViewController {
         
         self.getPosts("tech")
         self.getCategoriesRequest()
-        
     }
     
     func refresh(_ sender:AnyObject) {
@@ -70,49 +67,20 @@ class ViewController: UIViewController {
     }
     
     func getCategoriesRequest() {
-        
         Alamofire.request(baseUrl + "/v1/categories", headers: headers).responseObject { (response: DataResponse<Categories>) in
         
-            self.categories = response.value!.cats
-            self.menuView.updateItems(self.categories.map({$0.name}) as [AnyObject])
-        }
-
+            switch response.result {
+            case .success:
             
-//            .responseJSON { response in
-//            switch response.result {
-//            case .success:
-//                print("Get Categories Request Successful")
-//                
-//                if let json = response.result.value as? [String : AnyObject] {
-//                    if let rows = json["categories"] as? [[String : AnyObject]] {
-//                        
-//                        var items = [String]()
-//                        for row in rows {
-//                            self.categories.append( Category.init(
-//                                color: row["color"] as! String,
-//                                id: row["id"] as! Int,
-//                                item_name: row["item_name"] as! String,
-//                                name: row["name"] as! String,
-//                                slug: row["slug"] as! String
-//                            ))
-//                            
-//                            items.append(row["name"] as! String)
-//                        }
-//                        
-//                        self.menuView.updateItems(items as [AnyObject])
-//                    }
-//                } else {
-//                    print("Error with Json")
-//                }
-//                
-//            case .failure(let error):
-//                print(error)
-//            }
-//        }
+                self.categories = response.value!.cats
+                self.menuView.updateItems(self.categories.map({$0.name}) as [AnyObject])
+            case .failure(let error):
+                print(error)
+            }
+        }
     }
     
     func getPosts(_ category: String) {
-        
         if self.currentCat == category {
             return
         }
@@ -132,88 +100,37 @@ class ViewController: UIViewController {
     }
     
     func getPostsRequest(_ category: String) {
-        
         if !self.refreshControl.isRefreshing {
             self.startActivitiIndicator()
         }
         Alamofire.request(baseUrl + "/v1/categories/\(category)/posts?days_ago=0", headers: headers).responseObject { (response: DataResponse<Posts>) in
             
-//            print(response.value)
-            self.posts.updateValue(response.value!.posts, forKey: category)
-            
-            if response.value!.posts.count == 0 {
-                self.errorLabel.text = "There are no posts today..."
-                self.errorLabel.isHidden = false
-            } else {
-                self.errorLabel.isHidden = true
-            }
+            switch response.result {
+            case .success:
 
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
+                self.posts.updateValue(response.value!.posts, forKey: category)
+                
+                if response.value!.posts.count == 0 {
+                    self.errorLabel.text = "There are no posts today..."
+                    self.errorLabel.isHidden = false
+                } else {
+                    self.errorLabel.isHidden = true
+                }
+
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
+            case .failure(let error):
+                print(error)
             }
             
             self.activityIndicator?.stopAnimating()
             self.activitiView?.isHidden = true
             self.refreshControl.endRefreshing()
-            
         }
-        
-        
-//            .responseJSON { response in
-//            switch response.result {
-//            case .success:
-//                print("Get Posts Request Successful")
-//                
-//                if let json = response.result.value as? [String : AnyObject] {
-//                    if let rows = json["posts"] as? [[String : AnyObject]] {
-//                        
-//                        var postsForOneCat = [Post]()
-//                        
-//                        for row in rows {
-//                            let thumb = (row["thumbnail"] as! [String : AnyObject])
-//                            
-//                            postsForOneCat.append(
-//                                Post.init(
-//                                    id: row["id"] as! Int,
-//                                    name: row["name"] as! String,
-//                                    tagline: row["tagline"] as! String,
-//                                    votes_count: row["votes_count"] as! Int,
-//                                    thumbnail: Thumbnail.init(id: thumb["id"] as! Int, media_type: thumb["media_type"] as! String, image_url: thumb["image_url"] as! String),
-//                                    redirect_url: row["redirect_url"] as! String,
-//                                    screenshot_url: (row["screenshot_url"] as! [String : String])["850px"]!,
-//                                    screenshot_url_mini: (row["screenshot_url"] as! [String : String])["300px"]!
-//                            ))
-//                        }
-//                        
-//                        self.posts.updateValue(postsForOneCat, forKey: category)
-//                        
-//                        if postsForOneCat.count == 0 {
-//                            self.errorLabel.text = "There are no posts today..."
-//                            self.errorLabel.isHidden = false
-//                        } else {
-//                            self.errorLabel.isHidden = true
-//                        }
-//                        
-//                        DispatchQueue.main.async {
-//                            self.tableView.reloadData()
-//                        }
-//
-//                    }
-//                } else {
-//                    print("Error with Json")
-//                }
-//            case .failure(let error):
-//                print(error)
-//            }
-//            self.activityIndicator?.stopAnimating()
-//            self.activitiView?.isHidden = true
-//            self.refreshControl.endRefreshing()
-//        }
     }
     
     func startActivitiIndicator() {
-        
-        
         if activitiView == nil {
             activitiView = UIView.init(frame: CGRect.init(x: self.view.frame.width/2-40, y: self.view.frame.height/2-40, width: 80, height: 80))
             self.activitiView?.backgroundColor = UIColor.hex("0x444444", alpha: 0.6)
@@ -234,7 +151,6 @@ class ViewController: UIViewController {
     }
     
     func download(url: String, completion: @escaping (_ image: UIImage?) -> Void) {
-        
         Alamofire.request(url).responseData { response in
             if let data = response.result.value {
                 completion(UIImage(data: data))
@@ -244,22 +160,18 @@ class ViewController: UIViewController {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        
         if segue.identifier == "SegueToInfo",
             let viewController: InfoViewController = segue.destination as? InfoViewController {
             viewController.post = self.posts[self.currentCat]![(self.currentIndex?.row)!]
         }
     }
-
 }
-
 
 // MARK: - UITableViewDataSource and UITableViewDelegate
 extension ViewController: UITableViewDataSource, UITableViewDelegate {
     // table view data source and delegate methods
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        
         if self.posts[self.currentCat]?.count == nil || self.posts[self.currentCat]?.count == 0 {
             self.tableView.isHidden = true
             return 0
@@ -270,7 +182,6 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
         let cell: TableViewCell = self.tableView.dequeueReusableCell(withIdentifier: "TableViewCell") as! TableViewCell
         
         cell.preservesSuperviewLayoutMargins = false
@@ -309,7 +220,6 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
         }
         
         if currentPosts[indexPath.row].thumbnail.image == nil {
-            
             DispatchQueue.global().async {
                 //download image
                 self.download(url: (currentPosts[indexPath.row].thumbnail.image_url)!, completion: { (image: UIImage?) in
@@ -331,13 +241,7 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
         self.currentIndex = indexPath
         performSegue(withIdentifier: "SegueToInfo", sender: self)
     }
-    
 }
-
-
-
-

@@ -42,8 +42,6 @@ class InfoViewController: UIViewController {
         self.votesCountButton.layer.cornerRadius = 3
         
         self.getItButton.layer.cornerRadius = self.votesCountButton.layer.cornerRadius
-        
-        
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -60,14 +58,15 @@ class InfoViewController: UIViewController {
     }
     
     func openLink(link: String) {
-        if let url = NSURL(string: link){ if #available(iOS 10.0, *) {
+        if let url = NSURL(string: link){
+            if #available(iOS 10.0, *) {
             UIApplication.shared.open(url as URL, options: [:], completionHandler: nil)
-        } else {
+            } else {
             // Fallback on earlier versions
             UIApplication.shared.openURL(URL(string: link)!)
-            } }
+            }
+        }
     }
-    
     
     func downloadImage() {
         //download small image
@@ -87,7 +86,6 @@ class InfoViewController: UIViewController {
     }
     
     func download(url: String, completion: @escaping (_ image: UIImage?) -> Void) {
-        
         Alamofire.request(url).responseData { response in
             if let data = response.result.value {
                 completion(UIImage(data: data))
@@ -95,12 +93,8 @@ class InfoViewController: UIViewController {
         }
         completion(nil)
     }
-
 }
 
 extension InfoViewController: UIScrollViewDelegate {
     
-    
 }
-
-

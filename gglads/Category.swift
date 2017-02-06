@@ -24,20 +24,8 @@ final class Category: ResponseObjectSerializable {
     var item_name: String!
     var name: String!
     var slug: String!
-    
-//    init(color: String, id: Int, item_name: String, name: String, slug: String) {
-//        super.init()
-//        
-//        self.color = color
-//        self.id = id
-//        self.item_name = item_name
-//        self.name = name
-//        self.slug = slug
-//        
-//    }
-    
+
     required init?(response: HTTPURLResponse, representation: AnyObject) {
-        
         self.color = representation.value(forKey:"color") as! String
         self.id = representation.value(forKey:"id") as! Int
         self.item_name = representation.value(forKey:"item_name") as! String
@@ -50,5 +38,4 @@ final class Category: ResponseObjectSerializable {
         // using the map function we are able to instantiate Post while reusing our init? method above
         return catsArray.map({ Category(response:response, representation: $0 as AnyObject)! })
     }
-
 }

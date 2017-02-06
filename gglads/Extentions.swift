@@ -12,7 +12,6 @@ import UIKit
 extension UIColor {
     
     static func hex (_ hexStr : NSString, alpha : CGFloat) -> UIColor {
-        
         let realHexStr = hexStr.replacingOccurrences(of: "#", with: "")
         let scanner = Scanner(string: realHexStr as String)
         var color: UInt32 = 0
@@ -27,4 +26,3 @@ extension UIColor {
         }
     }
 }
-
